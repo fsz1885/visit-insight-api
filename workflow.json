@@ -1,0 +1,113 @@
+{
+  "name": "接访文本到客户洞察看板",
+  "version": "1.2.0",
+  "entrypoint": "visit_workflow.pipeline:run_pipeline",
+  "input": "transcript_text_file",
+  "provider": "Kimi Code",
+  "model": "selected_at_task_start",
+  "reasoning_effort": "high",
+  "output": "report.html",
+  "nodes": [
+    {
+      "id": "ingest",
+      "type": "local",
+      "next": "extract"
+    },
+    {
+      "id": "extract",
+      "type": "bounded_parallel_map",
+      "prompt": "extract.txt",
+      "schema": "extraction.json",
+      "next": "validate",
+      "merge_order": "source_order"
+    },
+    {
+      "id": "validate",
+      "type": "local",
+      "next": [
+        "analysis-customer",
+        "analysis-visit",
+        "analysis-decision"
+      ]
+    },
+    {
+      "id": "analysis-customer",
+      "type": "llm_parallel_branch",
+      "prompt": "analyze-customer.txt",
+      "schema": "customeranalysis.json",
+      "next": "join"
+    },
+    {
+      "id": "analysis-visit",
+      "type": "llm_parallel_branch",
+      "prompt": "analyze-visit.txt",
+      "schema": "visitanalysis.json",
+      "next": "join"
+    },
+    {
+      "id": "analysis-decision",
+      "type": "llm_parallel_branch",
+      "prompt": "analyze-decision.txt",
+      "schema": "decisionanalysis.json",
+      "next": "join"
+    },
+    {
+      "id": "join",
+      "type": "local_validate_analysis",
+      "requires": [
+        "analysis-customer",
+        "analysis-visit",
+        "analysis-decision"
+      ],
+      "next": "plan"
+    },
+    {
+      "id": "plan",
+      "type": "llm",
+      "prompt": "plan.txt",
+      "schema": "plan.json",
+      "next": "audit"
+    },
+    {
+      "id": "audit",
+      "type": "llm",
+      "prompt": "audit.txt",
+      "schema": "audit.json",
+      "pass": "render",
+      "needs_review": "repair"
+    },
+    {
+      "id": "repair",
+      "type": "llm",
+      "prompt": "repair.txt",
+      "schema": "draft.json",
+      "max_rounds": 2,
+      "next": "audit",
+      "exhausted": "render_as_draft"
+    },
+    {
+      "id": "render",
+      "type": "local_jinja2",
+      "template": "report.html"
+    },
+    {
+      "id": "render_as_draft",
+      "type": "local_jinja2",
+      "template": "report.html",
+      "status": "needs_review"
+    }
+  ],
+  "note": "节点拓扑说明。运行实现以 entrypoint 为准，不是第三方编排平台的导入格式。",
+  "max_concurrency": 3,
+  "concurrency_setting": "KIMI_CODE_CONCURRENCY (1-8)",
+  "usage": {
+    "ledger": "usage.json",
+    "summary": "usage-summary.json",
+    "write_policy": "persist each request start and finish; retries included; cache hits excluded from tokens"
+  },
+  "available_models": [
+    "k3",
+    "k3-256k",
+    "kimi-for-coding"
+  ]
+}

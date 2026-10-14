@@ -1,0 +1,7 @@
+根据共同的事实集、完整有效原文与程序冲突，独立分析客户画像和需求。你与带看事实、决策阶段节点并发运行，不假设已看到其他节点输出。
+profile：动机、家庭、决策角色、沟通方式；behavior_hypotheses 只能标推断，无依据为空。
+needs：完整覆盖 who、what、why、when、where、how、how_much，区分 must、want、excluded，缺失写 unknowns。
+maturity：已稳定/发育中/待确认；未提及不能写成未意识到。
+core_tension：最多一个有证据的取舍，没有明显矛盾为 null，不强套心理学标签。
+blind_spots：尚未确认的问题。不得忽略 program_issues 或凭空修正金额。正文不写内部编号，证据在 evidence_refs 中引用。
+只返回 CustomerAnalysis JSON。

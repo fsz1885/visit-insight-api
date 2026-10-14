@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "Issue": {
+      "additionalProperties": false,
+      "properties": {
+        "severity": {
+          "enum": [
+            "blocker",
+            "warning"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "problem": {
+          "title": "Problem",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "required_action": {
+          "title": "Required Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "severity",
+        "path",
+        "problem",
+        "evidence_refs",
+        "required_action"
+      ],
+      "title": "Issue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "verdict": {
+      "enum": [
+        "pass",
+        "pass_with_unknowns",
+        "needs_review"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/Issue"
+      },
+      "maxItems": 30,
+      "title": "Issues",
+      "type": "array"
+    }
+  },
+  "required": [
+    "verdict",
+    "issues"
+  ],
+  "title": "Audit",
+  "type": "object"
+}

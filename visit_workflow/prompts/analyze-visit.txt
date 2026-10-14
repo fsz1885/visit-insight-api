@@ -1,0 +1,6 @@
+根据共同的事实集、完整有效原文与程序冲突，独立整理本次带看。你与客户需求、决策阶段节点并发运行。
+budget：客户预算与销售报价分开，冲突显著呈现，不推定最终预算。
+properties：仅记录有信息的房源，未知面积价格标待验证，客户反应不能用销售评价替代。
+key_moments：最多三个不同的重要事件，描述前情、客户反应与意义，不凑数。
+competitors 和 customer_next_steps：只记录原文支持的比较对象和后续计划，销售建议不等于客户承诺。
+不得忽略 program_issues。正文不写内部编号，证据在 evidence_refs 中引用。只返回 VisitAnalysis JSON。

@@ -1,0 +1,29 @@
+name: visit-insight
+services:
+  app:
+    build: .
+    image: visit-insight:local
+    environment:
+      KIMI_CODE_CONCURRENCY: ${KIMI_CODE_CONCURRENCY:-3}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+    ports:
+      - "0.0.0.0:8767:8767"
+    volumes:
+      - type: bind
+        source: ./model.json
+        target: /app/model.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./录音文本
+        target: /app/录音文本
+        read_only: true
+      - type: bind
+        source: ./runs
+        target: /app/runs
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true

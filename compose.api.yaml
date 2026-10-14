@@ -1,0 +1,25 @@
+name: visit-insight-api
+services:
+  api:
+    build: .
+    image: visit-insight-api:local
+    environment:
+      VISIT_API_TOKEN: ${VISIT_API_TOKEN:?Set VISIT_API_TOKEN in .env}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4-pro}
+      DEEPSEEK_REASONING_EFFORT: ${DEEPSEEK_REASONING_EFFORT:-high}
+      KIMI_CODE_API_KEY: ${KIMI_CODE_API_KEY:-}
+      KIMI_CODE_MODEL: ${KIMI_CODE_MODEL:-k3}
+      KIMI_CODE_CONCURRENCY: ${KIMI_CODE_CONCURRENCY:-8}
+    ports:
+      - "0.0.0.0:${VISIT_PORT:-8767}:8767"
+    volumes:
+      - api-runs:/app/runs
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  api-runs:

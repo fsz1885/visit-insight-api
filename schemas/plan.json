@@ -1,0 +1,130 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "priority": {
+          "enum": [
+            "优先",
+            "随后"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "blocker_ref": {
+          "title": "Blocker Ref",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "materials": {
+          "title": "Materials",
+          "type": "string"
+        },
+        "suggested_timing": {
+          "title": "Suggested Timing",
+          "type": "string"
+        },
+        "completion_criterion": {
+          "title": "Completion Criterion",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "priority",
+        "blocker_ref",
+        "title",
+        "owner",
+        "action",
+        "question",
+        "materials",
+        "suggested_timing",
+        "completion_criterion",
+        "evidence_refs"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "description": "60-140字核心洞察，最多180字。正文不写E编号，只在evidence_refs引用。包含推断时标推断。",
+          "maxLength": 180,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "明确",
+            "推断",
+            "待验证",
+            "冲突",
+            "明确否定"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence_refs"
+      ],
+      "title": "Summary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "summary": {
+      "$ref": "#/$defs/Summary"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/Action"
+      },
+      "maxItems": 4,
+      "title": "Actions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "summary",
+    "actions"
+  ],
+  "title": "Plan",
+  "type": "object"
+}

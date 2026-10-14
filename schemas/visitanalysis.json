@@ -1,0 +1,158 @@
+{
+  "$defs": {
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "明确",
+            "推断",
+            "待验证",
+            "冲突",
+            "明确否定"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence_refs"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Moment": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "before": {
+          "$ref": "#/$defs/Claim"
+        },
+        "reaction": {
+          "$ref": "#/$defs/Claim"
+        },
+        "significance": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "title",
+        "before",
+        "reaction",
+        "significance"
+      ],
+      "title": "Moment",
+      "type": "object"
+    },
+    "Property": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "area": {
+          "$ref": "#/$defs/Claim"
+        },
+        "price": {
+          "$ref": "#/$defs/Claim"
+        },
+        "advantages": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 3,
+          "title": "Advantages",
+          "type": "array"
+        },
+        "drawbacks": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 3,
+          "title": "Drawbacks",
+          "type": "array"
+        },
+        "reaction": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "name",
+        "area",
+        "price",
+        "advantages",
+        "drawbacks",
+        "reaction"
+      ],
+      "title": "Property",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "key_moments": {
+      "items": {
+        "$ref": "#/$defs/Moment"
+      },
+      "maxItems": 3,
+      "title": "Key Moments",
+      "type": "array"
+    },
+    "budget": {
+      "$ref": "#/$defs/Claim"
+    },
+    "properties": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Property"
+      },
+      "maxItems": 10,
+      "title": "Properties"
+    },
+    "competitors": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "maxItems": 8,
+      "title": "Competitors",
+      "type": "array"
+    },
+    "customer_next_steps": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "maxItems": 6,
+      "title": "Customer Next Steps",
+      "type": "array"
+    }
+  },
+  "required": [
+    "key_moments",
+    "budget",
+    "properties",
+    "competitors",
+    "customer_next_steps"
+  ],
+  "title": "VisitAnalysis",
+  "type": "object"
+}

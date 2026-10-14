@@ -1,0 +1,6 @@
+根据 audit 与 program_issues 修正 draft。返回完整 Draft JSON (analysis + plan)。
+只修复被指出的错误及依赖它的摘要 / 阶段 / 动作，不添加新事实。
+证据不足的心理或金额结论改为待验证，或删除。保留未解决的冲突。
+所有 evidence_refs 必须来自现有原文。actions.blocker_ref 必须对应修正后的 blocker.id。
+修正不是把问题隐藏，而是让读者能正确理解证据边界。
+summary 控制为60-140字，最多180字；综合阶段或因果解释标推断，具体冲突留在分析与质检区。所有正文不写E00001等内部编号，只在evidence_refs保存引用。

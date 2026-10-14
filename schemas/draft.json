@@ -1,0 +1,594 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "priority": {
+          "enum": [
+            "优先",
+            "随后"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "blocker_ref": {
+          "title": "Blocker Ref",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "materials": {
+          "title": "Materials",
+          "type": "string"
+        },
+        "suggested_timing": {
+          "title": "Suggested Timing",
+          "type": "string"
+        },
+        "completion_criterion": {
+          "title": "Completion Criterion",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "priority",
+        "blocker_ref",
+        "title",
+        "owner",
+        "action",
+        "question",
+        "materials",
+        "suggested_timing",
+        "completion_criterion",
+        "evidence_refs"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "Analysis": {
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "needs": {
+          "$ref": "#/$defs/Needs"
+        },
+        "maturity": {
+          "items": {
+            "$ref": "#/$defs/Maturity"
+          },
+          "maxItems": 10,
+          "title": "Maturity",
+          "type": "array"
+        },
+        "core_tension": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Claim"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "key_moments": {
+          "items": {
+            "$ref": "#/$defs/Moment"
+          },
+          "maxItems": 3,
+          "title": "Key Moments",
+          "type": "array"
+        },
+        "journey": {
+          "$ref": "#/$defs/Journey"
+        },
+        "budget": {
+          "$ref": "#/$defs/Claim"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Property"
+          },
+          "maxItems": 10,
+          "title": "Properties"
+        },
+        "competitors": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 8,
+          "title": "Competitors",
+          "type": "array"
+        },
+        "customer_next_steps": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 6,
+          "title": "Customer Next Steps",
+          "type": "array"
+        },
+        "blind_spots": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Blind Spots",
+          "type": "array"
+        }
+      },
+      "required": [
+        "profile",
+        "needs",
+        "maturity",
+        "core_tension",
+        "key_moments",
+        "journey",
+        "budget",
+        "properties",
+        "competitors",
+        "customer_next_steps",
+        "blind_spots"
+      ],
+      "title": "Analysis",
+      "type": "object"
+    },
+    "Blocker": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "需求型",
+            "条件型"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "kind",
+        "detail"
+      ],
+      "title": "Blocker",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "明确",
+            "推断",
+            "待验证",
+            "冲突",
+            "明确否定"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence_refs"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Journey": {
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "动机酝酿",
+            "信息搜索",
+            "需求发育",
+            "聚焦收敛",
+            "有效比较",
+            "签约交付",
+            "暂无法判断"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 5,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "gaps": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 5,
+          "title": "Gaps",
+          "type": "array"
+        },
+        "readiness": {
+          "$ref": "#/$defs/Claim"
+        },
+        "blockers": {
+          "items": {
+            "$ref": "#/$defs/Blocker"
+          },
+          "maxItems": 2,
+          "title": "Blockers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "stage",
+        "reasons",
+        "gaps",
+        "readiness",
+        "blockers"
+      ],
+      "title": "Journey",
+      "type": "object"
+    },
+    "Maturity": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "已稳定",
+            "发育中",
+            "待确认"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "name",
+        "state",
+        "detail"
+      ],
+      "title": "Maturity",
+      "type": "object"
+    },
+    "Moment": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "before": {
+          "$ref": "#/$defs/Claim"
+        },
+        "reaction": {
+          "$ref": "#/$defs/Claim"
+        },
+        "significance": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "title",
+        "before",
+        "reaction",
+        "significance"
+      ],
+      "title": "Moment",
+      "type": "object"
+    },
+    "NeedRow": {
+      "additionalProperties": false,
+      "properties": {
+        "must": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 5,
+          "title": "Must",
+          "type": "array"
+        },
+        "want": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 5,
+          "title": "Want",
+          "type": "array"
+        },
+        "excluded": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 3,
+          "title": "Excluded",
+          "type": "array"
+        },
+        "unknowns": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 4,
+          "title": "Unknowns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "must",
+        "want",
+        "excluded",
+        "unknowns"
+      ],
+      "title": "NeedRow",
+      "type": "object"
+    },
+    "Needs": {
+      "additionalProperties": false,
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/NeedRow"
+        },
+        "what": {
+          "$ref": "#/$defs/NeedRow"
+        },
+        "why": {
+          "$ref": "#/$defs/NeedRow"
+        },
+        "when": {
+          "$ref": "#/$defs/NeedRow"
+        },
+        "where": {
+          "$ref": "#/$defs/NeedRow"
+        },
+        "how": {
+          "$ref": "#/$defs/NeedRow"
+        },
+        "how_much": {
+          "$ref": "#/$defs/NeedRow"
+        }
+      },
+      "required": [
+        "who",
+        "what",
+        "why",
+        "when",
+        "where",
+        "how",
+        "how_much"
+      ],
+      "title": "Needs",
+      "type": "object"
+    },
+    "Plan": {
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "$ref": "#/$defs/Summary"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "maxItems": 4,
+          "title": "Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "summary",
+        "actions"
+      ],
+      "title": "Plan",
+      "type": "object"
+    },
+    "Profile": {
+      "additionalProperties": false,
+      "properties": {
+        "motivations": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 6,
+          "title": "Motivations",
+          "type": "array"
+        },
+        "household": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 6,
+          "title": "Household",
+          "type": "array"
+        },
+        "decision_roles": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 6,
+          "title": "Decision Roles",
+          "type": "array"
+        },
+        "communication": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 4,
+          "title": "Communication",
+          "type": "array"
+        },
+        "behavior_hypotheses": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 3,
+          "title": "Behavior Hypotheses",
+          "type": "array"
+        }
+      },
+      "required": [
+        "motivations",
+        "household",
+        "decision_roles",
+        "communication",
+        "behavior_hypotheses"
+      ],
+      "title": "Profile",
+      "type": "object"
+    },
+    "Property": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "area": {
+          "$ref": "#/$defs/Claim"
+        },
+        "price": {
+          "$ref": "#/$defs/Claim"
+        },
+        "advantages": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 3,
+          "title": "Advantages",
+          "type": "array"
+        },
+        "drawbacks": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 3,
+          "title": "Drawbacks",
+          "type": "array"
+        },
+        "reaction": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "name",
+        "area",
+        "price",
+        "advantages",
+        "drawbacks",
+        "reaction"
+      ],
+      "title": "Property",
+      "type": "object"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "description": "60-140字核心洞察，最多180字。正文不写E编号，只在evidence_refs引用。包含推断时标推断。",
+          "maxLength": 180,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "明确",
+            "推断",
+            "待验证",
+            "冲突",
+            "明确否定"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence_refs"
+      ],
+      "title": "Summary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analysis": {
+      "$ref": "#/$defs/Analysis"
+    },
+    "plan": {
+      "$ref": "#/$defs/Plan"
+    }
+  },
+  "required": [
+    "analysis",
+    "plan"
+  ],
+  "title": "Draft",
+  "type": "object"
+}

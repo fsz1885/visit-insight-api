@@ -1,0 +1,282 @@
+{
+  "$defs": {
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "明确",
+            "推断",
+            "待验证",
+            "冲突",
+            "明确否定"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence_refs"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Excluded": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_refs",
+        "reason"
+      ],
+      "title": "Excluded",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "明确",
+            "推断",
+            "待验证",
+            "冲突",
+            "明确否定"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "id": {
+          "default": "",
+          "title": "Id",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "dimension": {
+          "enum": [
+            "who",
+            "what",
+            "why",
+            "when",
+            "where",
+            "how",
+            "how_much",
+            "other"
+          ],
+          "title": "Dimension",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "客户陈述",
+            "销售陈述",
+            "说话人待确认"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "requirement": {
+          "enum": [
+            "必须",
+            "偏好",
+            "排除",
+            "未分类"
+          ],
+          "title": "Requirement",
+          "type": "string"
+        },
+        "numeric": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NumericFact"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence_refs",
+        "subject",
+        "dimension",
+        "source",
+        "requirement"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "NumericFact": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "总价",
+            "首付",
+            "贷款",
+            "价差",
+            "月供",
+            "面积",
+            "单价",
+            "其他"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "amount": {
+          "minimum": 0,
+          "title": "Amount",
+          "type": "number"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "scenario": {
+          "description": "只对有明确证据属于同一房源同一报价方案的数字使用相同 scenario，否则分别标记",
+          "title": "Scenario",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "amount",
+        "unit",
+        "scenario"
+      ],
+      "title": "NumericFact",
+      "type": "object"
+    },
+    "SpeakerRole": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "销售",
+            "客户",
+            "陪同者",
+            "其他",
+            "未知"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "description": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "label",
+        "role",
+        "description"
+      ],
+      "title": "SpeakerRole",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "speakers": {
+      "items": {
+        "$ref": "#/$defs/SpeakerRole"
+      },
+      "title": "Speakers",
+      "type": "array"
+    },
+    "facts": {
+      "items": {
+        "$ref": "#/$defs/Fact"
+      },
+      "maxItems": 100,
+      "title": "Facts",
+      "type": "array"
+    },
+    "excluded": {
+      "items": {
+        "$ref": "#/$defs/Excluded"
+      },
+      "title": "Excluded",
+      "type": "array"
+    },
+    "unknowns": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unknowns",
+      "type": "array"
+    },
+    "conflicts": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "possible_multiple_visits": {
+      "title": "Possible Multiple Visits",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "speakers",
+    "facts",
+    "excluded",
+    "unknowns",
+    "conflicts",
+    "possible_multiple_visits"
+  ],
+  "title": "Extraction",
+  "type": "object"
+}

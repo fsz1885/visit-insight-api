@@ -1,0 +1,9 @@
+**
+!Dockerfile
+!requirements.lock.txt
+!visit_workflow/
+!visit_workflow/**
+!examples/
+!examples/**
+**/__pycache__/
+**/*.pyc

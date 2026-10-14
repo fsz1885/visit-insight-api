@@ -1,0 +1,138 @@
+{
+  "$defs": {
+    "Blocker": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "需求型",
+            "条件型"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Claim"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "kind",
+        "detail"
+      ],
+      "title": "Blocker",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "明确",
+            "推断",
+            "待验证",
+            "冲突",
+            "明确否定"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence_refs"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Journey": {
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "动机酝酿",
+            "信息搜索",
+            "需求发育",
+            "聚焦收敛",
+            "有效比较",
+            "签约交付",
+            "暂无法判断"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 5,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "gaps": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "maxItems": 5,
+          "title": "Gaps",
+          "type": "array"
+        },
+        "readiness": {
+          "$ref": "#/$defs/Claim"
+        },
+        "blockers": {
+          "items": {
+            "$ref": "#/$defs/Blocker"
+          },
+          "maxItems": 2,
+          "title": "Blockers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "stage",
+        "reasons",
+        "gaps",
+        "readiness",
+        "blockers"
+      ],
+      "title": "Journey",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "journey": {
+      "$ref": "#/$defs/Journey"
+    }
+  },
+  "required": [
+    "journey"
+  ],
+  "title": "DecisionAnalysis",
+  "type": "object"
+}
