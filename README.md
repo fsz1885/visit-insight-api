@@ -8,6 +8,8 @@
 
 **作为 API 部署：** 见 [API.md](API.md)。使用 `docker compose -f compose.api.yaml up -d --build`，支持 Bearer 密钥认证、JSON 文本提交、单任务模型参数、异步状态查询和 HTML/JSON 下载。交互接口文档位于 `/docs`。
 
+**交给 AI Agent 调用：** 同一容器提供 `/mcp`（Streamable HTTP），另支持 stdio 转接。接入配置、9个工具和调用流程见 [MCP.md](MCP.md)。
+
 1. 双击项目目录中的 **启动工作流.cmd**。
 2. 浏览器打开 `http://127.0.0.1:8767`。
 3. 点击“从本地文件夹选择”，选择“录音文本”目录或其项目子文件夹中的文件；也可以拖入文件或一次选择多份文件。

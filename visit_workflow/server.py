@@ -80,8 +80,11 @@ def create_app(root: Path = RUNS, settings: Settings | None = None, allow_remote
 
     @asynccontextmanager
     async def lifespan(app):
-        yield
-        manager.close()
+        try:
+            async with mcp.session_manager.run():
+                yield
+        finally:
+            manager.close()
 
     app = FastAPI(title="接访洞察 API", version="1.0.0", docs_url='/docs', redoc_url=None, lifespan=lifespan)
     app.state.manager = manager
@@ -89,6 +92,9 @@ def create_app(root: Path = RUNS, settings: Settings | None = None, allow_remote
 
     @app.middleware("http")
     async def request_guard(request: Request, call_next):
+        is_mcp = request.url.path == '/mcp' or request.url.path.startswith('/mcp/')
+        if is_mcp and not access_token:
+            return JSONResponse({'detail': 'MCP requires VISIT_API_TOKEN'}, status_code=503)
         host = request.url.hostname
         if not allow_remote and host not in {"127.0.0.1", "localhost", "testserver"}:
             return JSONResponse({"detail": "仅限本机访问"}, status_code=403)
@@ -97,7 +103,7 @@ def create_app(root: Path = RUNS, settings: Settings | None = None, allow_remote
             scheme, _, credential = request.headers.get('authorization', '').partition(' ')
             if scheme.lower() == 'bearer':
                 authorized = secrets.compare_digest(credential.encode(), access_token.encode())
-            elif scheme.lower() == 'basic':
+            elif scheme.lower() == 'basic' and not is_mcp:
                 try:
                     password = base64.b64decode(credential, validate=True).decode().partition(':')[2]
                     authorized = secrets.compare_digest(password.encode(), access_token.encode())
@@ -105,7 +111,7 @@ def create_app(root: Path = RUNS, settings: Settings | None = None, allow_remote
                     pass
             if not authorized:
                 return JSONResponse({'detail': '需要有效的接口访问密钥'}, status_code=401,
-                                    headers={'WWW-Authenticate': 'Basic realm="Visit Insight"' if not request.url.path.startswith('/api/') else 'Bearer'})
+                                    headers={'WWW-Authenticate': 'Basic realm="Visit Insight"' if not is_mcp and not request.url.path.startswith('/api/') else 'Bearer'})
         if request.method in {"POST", "PUT", "DELETE", "PATCH"}:
             origin = request.headers.get("origin")
             if origin and origin != str(request.base_url).rstrip("/"):
@@ -311,4 +317,8 @@ def create_app(root: Path = RUNS, settings: Settings | None = None, allow_remote
         return HTMLResponse(path.read_text(encoding="utf-8"))
 
     app.mount("/static", StaticFiles(directory=STATIC), name="static")
+    from .mcp_server import build_mcp
+    mcp = build_mcp('http://localhost', access_token, app=app)
+    app.state.mcp = mcp
+    app.mount('/', mcp.streamable_http_app())
     return app

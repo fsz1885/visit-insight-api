@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "visit-insight": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "--entrypoint", "python", "-e", "VISIT_API_URL", "-e", "VISIT_API_TOKEN", "visit-insight-api:local", "-m", "visit_workflow.mcp_server"],
+      "env": {
+        "VISIT_API_URL": "http://host.docker.internal:8768",
+        "VISIT_API_TOKEN": "REPLACE_WITH_VISIT_API_TOKEN"
+      }
+    }
+  }
+}

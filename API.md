@@ -2,6 +2,8 @@
 
 输入已转写文本，异步生成「带看总结 / 客户洞察」双 Tab HTML 和结构化 JSON。支持 Kimi Code、DeepSeek、单份任务内最多 8 路并发和逐调用 token 记录。
 
+AI Agent 可直接通过同一服务的 `/mcp` 调用，详见 [MCP.md](MCP.md)。
+
 ## Docker 部署
 
 ```sh

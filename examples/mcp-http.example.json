@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "visit-insight": {
+      "url": "http://SERVER_IP:8768/mcp",
+      "headers": {"Authorization": "Bearer REPLACE_WITH_VISIT_API_TOKEN"}
+    }
+  }
+}
