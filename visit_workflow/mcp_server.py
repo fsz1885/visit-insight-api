@@ -32,11 +32,11 @@ def build_mcp(base_url: str, token: str, *, app=None):
             'Do not infer customer facts or successful completion from tool errors.'),
     )
 
-    async def request(method: str, path: str, **kwargs):
+    async def request(method: str, path: str, timeout: float = 30, **kwargs):
         transport = httpx.ASGITransport(app=app) if app is not None else None
         async with httpx.AsyncClient(base_url=base_url.rstrip('/'), transport=transport,
                                      headers={'Authorization': f'Bearer {token}', 'X-Visit-Workflow': '1'},
-                                     timeout=30, follow_redirects=False) as client:
+                                     timeout=timeout, follow_redirects=False) as client:
             try:
                 response = await client.request(method, path, **kwargs)
             except httpx.HTTPError:
@@ -78,6 +78,25 @@ def build_mcp(base_url: str, token: str, *, app=None):
         data = {'text':text,'filename':filename,'meta':{'client_alias':client_alias,'project':project,
                 'advisor':advisor,'visit_date':visit_date},'options':options}
         return compact(await request('POST','/api/v1/jobs',json=data))
+
+    @server.tool(annotations=PAID)
+    async def generate_visit_report_sync(
+        report_type: Literal['visit_summary', 'client_insight'],
+        transcripts: Annotated[list[dict[str, Any]], Field(min_length=1, max_length=20)],
+        ledger_records: Annotated[list[dict[str, Any]] | None, Field(max_length=200)] = None,
+        client_id: Annotated[str, Field(max_length=100)] = '',
+        project_id: Annotated[str, Field(max_length=100)] = '',
+    ) -> dict[str, Any]:
+        """Generate a paid lightweight summary in ONE synchronous model call (~45s).
+
+        Input 'transcripts' items follow {'title','segments':[{'speaker','text'}]}; 'ledger_records'
+        items follow {'fields': {...}}. Returns {'summary': text} directly. For the full
+        evidence-verified pipeline report use submit_visit_report instead; do not retry this
+        tool blindly on timeout.
+        """
+        data = {'report_type': report_type, 'client_id': client_id, 'project_id': project_id,
+                'transcripts': transcripts, 'ledger_records': ledger_records or []}
+        return await request('POST', '/api/v1/report-sync', json=data, timeout=90)
 
     @server.tool(annotations=READ)
     async def list_visit_reports(limit: Annotated[int, Field(ge=1,le=100)] = 20,

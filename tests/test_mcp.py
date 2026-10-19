@@ -36,9 +36,12 @@ class McpTests(unittest.TestCase):
         result=self.rpc('initialize',{'protocolVersion':'2025-06-18','capabilities':{},'clientInfo':{'name':'test','version':'1'}})
         self.assertEqual(result['serverInfo']['name'],'visit-insight')
         tools={t['name']:t for t in self.rpc('tools/list')['tools']}
-        self.assertEqual(len(tools),9)
+        self.assertEqual(len(tools),10)
         self.assertTrue(tools['get_visit_report']['annotations']['readOnlyHint'])
         self.assertFalse(tools['submit_visit_report']['annotations']['idempotentHint'])
+        sync=tools['generate_visit_report_sync']
+        self.assertFalse(sync['annotations']['destructiveHint'])
+        self.assertIn('summary',json.dumps(sync['description']))
         result=self.call('get_visit_service_info')
         self.assertFalse(result.get('isError'))
         self.assertEqual(result['structuredContent']['model'],'k3')

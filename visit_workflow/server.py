@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPBearer
 from fastapi import Depends
 from pydantic import BaseModel, Field, ValidationError
+from typing import Any, Literal
 from .config import RUNS, ROOT, Settings, PROVIDERS
 from .ingest import MAX_BYTES, ALLOWED
 from .jobs import JobManager, create_run
@@ -64,6 +65,58 @@ class TextJobBody(BaseModel):
     text: str = Field(min_length=1, max_length=MAX_BYTES)
     meta: Meta = Field(default_factory=Meta)
     options: TaskModelOptions | None = None
+
+
+class SyncReportBody(BaseModel):
+    model_config = {'extra': 'forbid'}
+    report_type: Literal['visit_summary', 'client_insight']
+    client_id: str = Field(default='', max_length=100)
+    project_id: str = Field(default='', max_length=100)
+    transcripts: list[dict[str, Any]] = Field(min_length=1, max_length=20)
+    ledger_records: list[dict[str, Any]] = Field(default_factory=list, max_length=200)
+    options: TaskModelOptions | None = None
+
+
+SYNC_PROMPTS = {
+    'visit_summary': (
+        '请根据接访转写（及可选的台账记录）输出一份到访摘要，包含：'
+        '客户构成与称呼、核心需求（面积/户型/楼层/预算等）、带看过程与关注点、'
+        '客户提出的疑虑或抗性、关键事实（报价、优惠、竞品对比等）、'
+        '以及建议的下一步跟进动作。只陈述转写与台账中可支撑的内容，'
+        '不编造、不推测未经证实的数字。输出为简体中文纯文本，600-900字，不用列表符号堆砌。'
+    ),
+    'client_insight': (
+        '请结合台账记录与接访转写输出一份客户洞察，包含：'
+        '客户画像（家庭结构、居住现状、购房动机）、意向强度判断及依据、'
+        '决策阶段与关键卡点、价格承受力线索、与同项目其他到访相比的异同（如台账提供多次记录）、'
+        '风险提示（信息冲突或缺失）与针对性策略建议。'
+        '区分「转写明确提到」与「合理推断」，推断处注明（推断）。'
+        '输出为简体中文纯文本，600-900字，不用列表符号堆砌。'
+    ),
+}
+
+
+def render_sync_input(body: SyncReportBody) -> tuple[str, str]:
+    parts = []
+    for index, item in enumerate(body.transcripts, 1):
+        lines = []
+        for segment in item.get('segments') or []:
+            if not isinstance(segment, dict):
+                continue
+            text = str(segment.get('text') or '').strip()
+            if text:
+                speaker = str(segment.get('speaker') or '').strip() or '未知'
+                lines.append(f"{speaker}：{text}")
+        if lines:
+            title = str(item.get('title') or f'转写{index}')
+            parts.append(f"【录音转写 {index}｜{title}】\n" + "\n".join(lines))
+    transcript_text = "\n\n".join(parts)[:800_000]
+    if not transcript_text.strip():
+        raise HTTPException(422, detail="transcripts 中没有可用文本")
+    ledger_lines = [json.dumps(row.get('fields') or {}, ensure_ascii=False)
+                    for row in body.ledger_records if isinstance(row, dict)]
+    ledger_text = "\n".join(ledger_lines)[:100_000]
+    return transcript_text, ledger_text
 
 
 def create_app(root: Path = RUNS, settings: Settings | None = None, allow_remote: bool = False,
@@ -228,6 +281,35 @@ def create_app(root: Path = RUNS, settings: Settings | None = None, allow_remote
     @app.get('/api/v1/jobs/{run_id}', dependencies=api_security, tags=['Reports'])
     def task_status(run_id: str):
         return task_view(run_id)
+
+    @app.post('/api/v1/report-sync', dependencies=api_security, tags=['Reports'])
+    def report_sync(body: SyncReportBody):
+        """单次模型调用的同步摘要（轻量、付费）；完整证据链报告仍走 POST /api/v1/jobs。"""
+        transcript_text, ledger_text = render_sync_input(body)
+        options = {'effort': 'low', 'max_tokens': 4000, 'timeout': 45}
+        if body.options:
+            options.update(body.options.model_dump(exclude_none=True))
+        with config_lock:
+            selected = current.select(options)
+        if not selected.api_key:
+            raise HTTPException(400, detail=f'服务端未配置 {selected.provider_name} API Key')
+        user_content = f"客户标识：{body.client_id or '未知'}\n项目标识：{body.project_id or '未知'}\n\n"
+        if ledger_text:
+            user_content += f"【台账记录（JSON，每行一条）】\n{ledger_text}\n\n"
+        user_content += f"【接访转写】\n{transcript_text}"
+        try:
+            client = KimiClient(selected)
+            summary, usage = client.complete(
+                [{'role': 'system',
+                  'content': '你是房地产接访分析助手。只依据提供的转写与台账内容输出，不编造事实。输出为简体中文纯文本。'},
+                 {'role': 'user',
+                  'content': SYNC_PROMPTS[body.report_type] + "\n\n" + user_content}],
+                max_tokens=selected.max_tokens)
+        except WorkflowError as exc:
+            raise HTTPException(400, detail=str(exc)) from exc
+        return {'status': 'complete', 'report_type': body.report_type,
+                'summary': summary.strip(), 'provider': selected.provider,
+                'model': selected.model, 'usage': usage}
 
     @app.get("/api/sources")
     def sources():

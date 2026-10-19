@@ -34,6 +34,27 @@ class ApiTests(unittest.TestCase):
         schema=self.client.get('/openapi.json').json()
         self.assertIn('security',schema['paths']['/api/v1/jobs']['post'])
 
+    def test_report_sync_returns_summary(self):
+        from visit_workflow.llm import KimiClient
+        segments=[{'speaker':'客户','text':'想要四房，预算500万。'},{'speaker':'顾问','text':'看过143平米户型。'}]
+        with patch.object(KimiClient,'complete',return_value=('摘要：客户意向四房。',{'prompt_tokens':10,'completion_tokens':5})) as mocked:
+            response=self.client.post('/api/v1/report-sync',headers=self.headers,json={
+                'report_type':'visit_summary','client_id':'client-1','project_id':'proj-1',
+                'transcripts':[{'id':'rec-1','segments':segments}],
+                'ledger_records':[{'sourceRecordId':'r1','fields':{'客户姓名':'张先生','意向评级':'A（认购）'}}]})
+            self.assertEqual(response.status_code,200,response.text)
+            body=response.json()
+            self.assertEqual(body['status'],'complete')
+            self.assertEqual(body['report_type'],'visit_summary')
+            self.assertEqual(body['summary'],'摘要：客户意向四房。')
+            messages=mocked.call_args.args[0]
+            self.assertIn('想要四房',messages[1]['content'])
+            self.assertIn('张先生',messages[1]['content'])
+            self.assertEqual(mocked.call_args.kwargs.get('max_tokens'),4000)
+        empty=self.client.post('/api/v1/report-sync',headers=self.headers,json={
+            'report_type':'visit_summary','transcripts':[{'segments':[]}]})
+        self.assertEqual(empty.status_code,422)
+
     def test_submit_snapshot_does_not_change_global_config(self):
         with patch.object(self.app.state.manager,'start') as start:
             response=self.client.post('/api/v1/jobs',headers=self.headers,json={
